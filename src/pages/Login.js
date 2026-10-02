@@ -18,7 +18,7 @@ function Login() {
   try {
 
     const response = await axios.post(
-      "https://finance-project-0qqk.onrender.com/api/auth/login",
+      "https://aws.srmfinance.online/api/auth/login",
       {
         mobile,
         password,
