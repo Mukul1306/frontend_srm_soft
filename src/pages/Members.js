@@ -153,8 +153,47 @@ function Members() {
     return rawStatus || "PAID";
   };
 
+  const getSettlementStatus = (member) => {
+  const settlementAmount = member?.settlementAmount;
+
+  // Settlement amount was never entered
+  if (
+    settlementAmount === undefined ||
+    settlementAmount === null ||
+    settlementAmount === "" ||
+    Number(settlementAmount) <= 0
+  ) {
+    return "NOT_SET";
+  }
+
+  // Settlement already paid
+  if (member?.settlementStatus === "PAID") {
+    return "SETTLED";
+  }
+
+  // Amount exists but not paid
+  return "PENDING";
+};
+
+
   // Dynamic sorting engine based on selection
-  const sortedMembers = [...dynamicFilteredMembers].sort((a, b) => {
+ const settlementFilteredMembers = dynamicFilteredMembers.filter((member) => {
+  if (sortBy === "settlementPending") {
+    return getSettlementStatus(member) === "PENDING";
+  }
+
+  if (sortBy === "settlementPaid") {
+  return getSettlementStatus(member) === "SETTLED";
+}
+
+  if (sortBy === "settlementNotSet") {
+    return getSettlementStatus(member) === "NOT_SET";
+  }
+
+  return true;
+});
+
+const sortedMembers = [...settlementFilteredMembers].sort((a, b) => {
     const statusA = getPaymentStatus(a);
     const statusB = getPaymentStatus(b);
 
@@ -373,6 +412,7 @@ function Members() {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-8 text-xs font-bold text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-indigo-400"
                 >
+
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                   <option value="az">A → Z</option>
@@ -384,6 +424,9 @@ function Members() {
                   <option value="due">Status: Due</option>
                   <option value="overdue">Status: Overdue</option>
                   <option value="completed">Status: Completed</option>
+                  <option value="settlementPending">Settlement Pending</option>
+<option value="settlementPaid">Settlement Paid</option>
+<option value="settlementNotSet">Settlement Not Set</option>
                 </select>
                 <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500" />
               </div>
@@ -432,8 +475,12 @@ function Members() {
                   <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Contact Metadata</th>
                   <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Assigned Society</th>
                   <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Ledger Status</th>
+                      <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Settlement
+                               </th>
                   <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Paid</th>
                   <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Balance</th>
+              
                   <th className="w-20 px-6 py-3.5 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400">Actions</th>
                 </tr>
               </thead>
@@ -510,6 +557,35 @@ function Members() {
                             );
                           })()}
                         </td>
+
+                        {/* Settlement Status */}
+<td className="whitespace-nowrap px-6 py-4">
+  {(() => {
+    const settlementStatus = getSettlementStatus(member);
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span
+          className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+            settlementStatus === "SETTLED"
+              ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200"
+              : settlementStatus === "PENDING"
+              ? "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200"
+              : "bg-slate-100 text-slate-500 ring-1 ring-inset ring-slate-200"
+          }`}
+        >
+          {settlementStatus}
+        </span>
+
+        {Number(member.settlementAmount || 0) > 0 && (
+          <span className="text-[11px] font-bold text-slate-500">
+            ₹{Number(member.settlementAmount).toLocaleString("en-IN")}
+          </span>
+        )}
+      </div>
+    );
+  })()}
+</td>
 
                         {/* Total Paid */}
                         <td className="whitespace-nowrap px-6 py-4">
@@ -593,7 +669,7 @@ function Members() {
 
                 {!loading && sortedMembers.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="px-6 py-16 text-center">
+                    <td colSpan="8" className="px-6 py-16 text-center">
                       <div className="flex flex-col items-center gap-2 text-slate-400">
                         <FiInbox className="text-2xl" />
                         <span className="text-sm font-bold">No matching registry records found.</span>

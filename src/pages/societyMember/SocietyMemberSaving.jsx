@@ -327,13 +327,15 @@ const [showPendingInstallments, setShowPendingInstallments] = useState(false);
           icon={CircleCheck}
           tone="green"
         />
-
-        <SummaryCard
-          label="Due Day"
-          value={`Day ${summary.dueDay || "--"}`}
-          icon={CalendarDays}
-          tone="blue"
-        />
+     <SummaryCard
+  label="Final Settlement"
+  value={`₹${Number(
+    member.settlementAmount || 0
+  ).toLocaleString("en-IN")}`}
+  icon={IndianRupee}
+  tone="green"
+/>
+   
       </section>
 
  {/* Pending Installments */}

@@ -24,7 +24,7 @@ function SocietyList() {
   const fetchSocieties = async () => {
     try {
       const res = await axios.get(
-        "https://finance-project-htz0.onrender.com/api/society/all"
+        "https://aws.srmfinance.online/api/society/all"
       );
       setSocieties(res.data.societies || []);
     } catch (error) {
@@ -45,7 +45,7 @@ function SocietyList() {
 
     try {
       const res = await axios.delete(
-        `https://finance-project-0qqk.onrender.com/api/society/delete/${id}`
+        `https://aws.srmfinance.online/api/society/delete/${id}`
       );
       alert(res.data.message || "Society deleted successfully");
       fetchSocieties();

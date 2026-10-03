@@ -922,6 +922,7 @@ function SocietyMemberProfile() {
               )
             }
           />
+          
 
           <ProfileField
             label="Installments"
@@ -1011,7 +1012,10 @@ function SocietyMemberProfile() {
               )
             }
           />
-
+<SummaryBox
+  label="Settlement Amount"
+  value={formatMoney(member.settlementAmount)}
+/>
         </div>
 
       </section>

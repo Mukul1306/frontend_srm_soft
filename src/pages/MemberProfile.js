@@ -18,7 +18,8 @@ function MemberProfile() {
   const { id } = useParams();
   const navigate = useNavigate(); // Added for uniform back navigation if needed
   const [member, setMember] = useState(null);
-  const [payments, setPayments] = useState([]);
+const [payments, setPayments] = useState([]);
+const [payingSettlement, setPayingSettlement] = useState(false);
 
 useEffect(() => {
   fetchMember();
@@ -53,7 +54,50 @@ useEffect(() => {
 
 };
   
+const handlePaySettlement = async () => {
+  if (!member?.settlementAmount || Number(member.settlementAmount) <= 0) {
+    alert("Settlement amount is not available.");
+    return;
+  }
 
+  if (
+    Number(member.paidInstallments || 0) <
+    Number(member.totalInstallments || 0)
+  ) {
+    alert("All installments must be completed before settlement.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Pay settlement of ₹${Number(member.settlementAmount).toLocaleString("en-IN")} to ${member.name}?`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setPayingSettlement(true);
+
+    const res = await axios.post(
+      `https://finance-project-0qqk.onrender.com/api/member/${id}/settle`,
+      {
+        paymentMethod: "Cash"
+      }
+    );
+
+    alert(res.data.message || "Settlement paid successfully.");
+
+    // Reload member so status/date are updated
+    await fetchMember();
+
+  } catch (error) {
+    alert(
+      error.response?.data?.message ||
+      "Failed to pay settlement."
+    );
+  } finally {
+    setPayingSettlement(false);
+  }
+};
   // Helper mapping to calculate custom ledger status pill style
   const getStatusBadgeStyle = (status) => {
     const s = (status || "PAID").toUpperCase();
@@ -399,6 +443,66 @@ useEffect(() => {
     ₹{member.monthlyPenalty || 0}
   </span>
 </div>
+
+
+<div className="flex justify-between items-center p-2.5 rounded-xl border border-[#f1f5f9] bg-[#f8fafc]/50">
+  <span className="text-[#64748b] font-bold uppercase tracking-wider">
+    Settlement Amount
+  </span>
+
+  <span className="text-sm font-black text-blue-600">
+    ₹{member.settlementAmount
+      ? Number(member.settlementAmount).toLocaleString("en-IN")
+      : "0"}
+  </span>
+</div>
+
+{Number(member.paidInstallments || 0) >= Number(member.totalInstallments || 0) && (
+  <div className="mt-4 p-4 rounded-xl border border-blue-100 bg-blue-50/50">
+
+    <div className="flex items-center justify-between gap-4">
+
+      <div>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Settlement Status
+        </p>
+
+        <p
+          className={`text-sm font-black mt-1 ${
+            member.settlementStatus === "PAID"
+              ? "text-emerald-600"
+              : "text-amber-600"
+          }`}
+        >
+          {member.settlementStatus === "PAID"
+            ? "PAID"
+            : "PENDING"}
+        </p>
+
+        {member.settlementDate && (
+          <p className="text-xs text-slate-400 mt-1">
+            Paid on{" "}
+            {new Date(member.settlementDate).toLocaleDateString("en-IN")}
+          </p>
+        )}
+      </div>
+
+      {member.settlementStatus !== "PAID" && (
+        <button
+          type="button"
+          onClick={handlePaySettlement}
+          disabled={payingSettlement}
+          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition disabled:opacity-50"
+        >
+          {payingSettlement
+            ? "Processing..."
+            : `Pay ₹${Number(member.settlementAmount || 0).toLocaleString("en-IN")}`}
+        </button>
+      )}
+
+    </div>
+  </div>
+)}
 
           </div>
         </div>

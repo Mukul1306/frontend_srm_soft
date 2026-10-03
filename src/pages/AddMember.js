@@ -50,8 +50,9 @@ const [formData, setFormData] = useState({
   nomineeName: "",
   nomineeMobile: "",
   monthlyPenalty: "",
-  monthlyInstallment: "",
-  dueDay: "10",
+monthlyInstallment: "",
+settlementAmount: "",
+dueDay: "10",
 
   password: "",
   confirmPassword: ""
@@ -130,11 +131,13 @@ useEffect(() => {
 
       nomineeMobile: member.nomineeMobile,
 
-      monthlyPenalty: member.monthlyPenalty,
+  monthlyPenalty: member.monthlyPenalty,
 
-      monthlyInstallment: member.monthlyInstallment,
+monthlyInstallment: member.monthlyInstallment,
 
-      dueDay: member.dueDay
+settlementAmount: member.settlementAmount || "",
+
+dueDay: member.dueDay
 
     });
 
@@ -598,7 +601,7 @@ if (isEdit) {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
 
 
               <div>
@@ -629,7 +632,23 @@ if (isEdit) {
                   required
                 />
               </div>
+           <div>
+  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">
+    Settlement Amount (₹)
+  </label>
 
+  <input
+    type="number"
+    name="settlementAmount"
+    placeholder="e.g., 30000"
+    min="0"
+    value={formData.settlementAmount}
+    onChange={handleChange}
+    disabled={submitting}
+    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition disabled:opacity-60"
+    required
+  />
+</div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Monthly Penalty Cap (₹)</label>
                 <input
@@ -664,7 +683,7 @@ if (isEdit) {
 
 
 {/* === SECTION 5: MEMBER LOGIN CREDENTIALS === */}
-{isEdit && (
+{(
   <div className="space-y-4">
 
     <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
