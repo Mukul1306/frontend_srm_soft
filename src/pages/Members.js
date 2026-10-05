@@ -57,7 +57,7 @@ function Members() {
   const fetchDashboardStats = async () => {
     try {
       const res = await axios.get(
-        "https://finance-project-0qqk.onrender.com/api/reports/dashboard"
+        "https://aws.srmfinance.online/api/reports/dashboard"
       );
       setStats(res.data || { totalMembers: 0, activeMembers: 0 });
     } catch (error) {
@@ -69,7 +69,7 @@ function Members() {
     setLoading(true);
     try {
       const res = await axios.get(
-        "https://finance-project-0qqk.onrender.com/api/member/all"
+        "https://aws.srmfinance.online/api/member/all"
       );
       setMembers(res.data.members || []);
     } catch (error) {
@@ -87,7 +87,7 @@ function Members() {
 
     try {
       const res = await axios.delete(
-        `https://finance-project-0qqk.onrender.com/api/member/delete/${id}`
+        `https://aws.srmfinance.online/api/member/delete/${id}`
       );
       alert(res.data.message || "Member deleted successfully");
       fetchMembers();

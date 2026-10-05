@@ -48,14 +48,20 @@ function Payment() {
   });
 
   // Load Initial Data
-  const fetchMembers = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/member/all`);
-      setMembers(res.data.members || []);
-    } catch (error) {
-      console.error("Error fetching members:", error);
-    }
-  };
+const fetchMembers = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/member/all`);
+
+    const updatedMembers = res.data.members || [];
+
+    setMembers(updatedMembers);
+
+    return updatedMembers;
+  } catch (error) {
+    console.error("Error fetching members:", error);
+    return [];
+  }
+};
 
   const fetchSummary = async () => {
     try {
@@ -143,14 +149,31 @@ function Payment() {
 
       alert(res.data.message || "Payment collected successfully!");
 
-      await Promise.all([
-        fetchMembers(),
-        fetchSummary(),
-        fetchPenaltySummary()
-      ]);
+     const updatedMembers = await fetchMembers();
 
-      const targetId = selectedMember.memberId || selectedMember._id;
-      await fetchPendingInstallment(targetId);
+await Promise.all([
+  fetchSummary(),
+  fetchPenaltySummary()
+]);
+
+
+
+const updatedMember = updatedMembers.find(
+  (member) =>
+    String(member._id) === String(selectedMember._id)
+);
+
+if (updatedMember) {
+  setSelectedMember(updatedMember);
+}
+
+// Reload pending installments for the popup
+const targetId =
+  updatedMember?.memberId ||
+  selectedMember.memberId ||
+  selectedMember._id;
+
+await fetchPendingInstallment(targetId);
 
       setPaymentData({
         paymentMode: "Cash",

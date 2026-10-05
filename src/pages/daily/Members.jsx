@@ -41,7 +41,7 @@ const [formData, setFormData] = useState({
 const loadAreas = async () => {
   try {
     const res = await axios.get(
-      "https://finance-project-0qqk.onrender.com/api/daily/areas"
+      "https://aws.srmfinance.online/api/daily/areas"
     );
 
     console.log("ADMIN AREAS:", res.data);
@@ -60,7 +60,7 @@ const loadAreas = async () => {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get("https://finance-project-0qqk.onrender.com/api/daily/members");
+      const res = await axios.get("https://aws.srmfinance.online/api/daily/members");
       setMembers(res.data.members || []);
     } catch (error) {
       console.error("Error fetching members:", error);
@@ -92,7 +92,7 @@ const loadAreas = async () => {
     }
 
     try {
-      await axios.post("https://finance-project-0qqk.onrender.com/api/daily/create-member", formData);
+      await axios.post("https://aws.srmfinance.online/api/daily/create-member", formData);
       alert("Member Added Successfully");
       setShowModal(false);
       
@@ -127,7 +127,7 @@ const loadAreas = async () => {
     if (!ok) return;
 
     try {
-      await axios.delete(`https://finance-project-0qqk.onrender.com/api/daily/member/${id}`);
+      await axios.delete(`https://aws.srmfinance.online/api/daily/member/${id}`);
       fetchMembers();
       alert("Member Deleted");
     } catch (error) {

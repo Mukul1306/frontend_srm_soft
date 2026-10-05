@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 
 const API =
-  "https://finance-project-0qqk.onrender.com/api/daily/salary";
+  "https://aws.srmfinance.online/api/daily/salary";
 
 const AGENTS_API =
-  "https://finance-project-0qqk.onrender.com/api/daily/agents";
+  "https://aws.srmfinance.online/api/daily/agents";
 
 /* ----------------------------------------------------------------------
    Design tokens — "Payroll Ledger"

@@ -204,11 +204,11 @@ const LoanList = () => {
   }
 
   const filteredLoans = loans.filter((item) => {
-    const matchesStatus = 
-      statusFilter === "All Status" || 
-      item.status === statusFilter ||
-      (statusFilter === "DUE" && item.status === "ACTIVE" && item.pendingEmis === 0) || 
-      (statusFilter === "OVERDUE" && item.pendingEmis > 0);
+   const matchesStatus =
+  statusFilter === "All Status" ||
+  item.status === statusFilter ||
+  (statusFilter === "DUE" && item.currentEmiStatus === "DUE") ||
+  (statusFilter === "OVERDUE" && item.currentEmiStatus === "OVERDUE");
 
     const matchesSearch = 
       (item.memberId?.name || "").toLowerCase().includes(search.toLowerCase()) || 
@@ -402,7 +402,8 @@ const LoanList = () => {
                 </tr>
               ) : (
                 filteredLoans.map((loan, index) => {
-                  const resolvedStatus = loan.pendingEmis > 0 && loan.status === "ACTIVE" ? "OVERDUE" : loan.status;
+                  const resolvedStatus =
+  loan.currentEmiStatus || loan.status;
 
                   return (
                     <tr key={loan._id} className="hover:bg-slate-50/60 transition-colors duration-150">
@@ -518,7 +519,8 @@ const LoanList = () => {
           </div>
         ) : (
           filteredLoans.map((loan) => {
-            const resolvedStatus = loan.pendingEmis > 0 && loan.status === "ACTIVE" ? "OVERDUE" : loan.status;
+            const resolvedStatus =
+  loan.currentEmiStatus || loan.status;
 
             return (
               <div key={loan._id} className="bg-white border border-[#e2e8f0] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">

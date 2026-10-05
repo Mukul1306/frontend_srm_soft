@@ -9,7 +9,7 @@ import {
 // CONFIG
 // =====================================================================
 
-const API = "https://finance-project-0qqk.onrender.com/api/daily/attendance";
+const API = "https://aws.srmfinance.online/api/daily/attendance";
 
 // Warm, punch-card inspired palette — teal for identity, amber for caution,
 // coral for absence, emerald for presence. Deliberately not slate/indigo.
