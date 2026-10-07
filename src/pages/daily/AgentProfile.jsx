@@ -44,7 +44,7 @@ const AgentProfile = () => {
   const fetchProfile = async () => {
     try {
       const res = await axios.get(
-        `https://aws.srmfinance.online/api/daily/agent-profile/${id}`
+        `https://finance-project-0qqk.onrender.com/api/daily/agent-profile/${id}`
       );
       setAgent(res.data.agent);
       setSummary(res.data.summary);

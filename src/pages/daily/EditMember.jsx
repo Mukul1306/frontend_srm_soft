@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-const API = "https://finance-project-0qqk.onrender.com/api/daily";
+const API = "https://aws.srmfinance.online/api/daily";
 
 function EditMember() {
   const { id } = useParams();

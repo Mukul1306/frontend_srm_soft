@@ -133,7 +133,7 @@ function DailySidebar() {
 </Link>
             <Link to="/daily/penalty" className={menuClass("/daily/penalty")}>
               <FiAlertTriangle className="text-lg" />
-              <span>Penalty Rules</span>
+              <span>Penalty Control</span>
             </Link>
 
             <Link to="/daily/notifications" className={menuClass("/daily/notifications")}>
