@@ -273,7 +273,7 @@ setPendingRequests(
     setRequestLoading(true);
 
     const res = await axios.get(
-      "https://aws.srmfinance.online  /api/daily/loan-requests"
+      "https://aws.srmfinance.online/api/daily/loan-requests"
     );
 
     const requests = res.data?.requests || [];

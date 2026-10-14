@@ -178,21 +178,30 @@ const LoanList = () => {
     }
   };
 
-  const getStatusStyle = (status) => {
-    const cleanStatus = (status || "").toUpperCase();
-    switch (cleanStatus) {
-      case "ACTIVE":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "CLOSED":
-        return "bg-slate-100 text-slate-600 border-slate-200";
-      case "DUE":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "OVERDUE":
-        return "bg-rose-50 text-rose-700 border-rose-200 animate-pulse";
-      default:
-        return "bg-slate-50 text-slate-500 border-slate-200";
-    }
-  };
+  
+const getStatusStyle = (status) => {
+  const cleanStatus = (status || "").toUpperCase();
+
+  switch (cleanStatus) {
+    case "ACTIVE":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+    case "ALL EMI COLLECTED":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+    case "CLOSED":
+      return "bg-slate-100 text-slate-600 border-slate-200";
+
+    case "DUE":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+
+    case "OVERDUE":
+      return "bg-rose-50 text-rose-700 border-rose-200 animate-pulse";
+
+    default:
+      return "bg-slate-50 text-slate-500 border-slate-200";
+  }
+};
 
   if (loading) {
     return (
@@ -447,26 +456,48 @@ const LoanList = () => {
                       </td>
 
                       <td className="py-4 px-6">
-                        {loan.pendingEmis > 0 ? (
-                          <div className="space-y-1 text-[11px]">
-                            <div className="flex justify-between gap-2">
-                              <span className="text-slate-400">Pending EMI:</span>
-                              <span className="font-black text-red-600">{loan.pendingEmis}</span>
-                            </div>
-                            <div className="flex justify-between gap-2">
-                              <span className="text-slate-400">Pending Int:</span>
-                              <span className="font-black text-orange-600">₹{loan.pendingInterest?.toLocaleString("en-IN")}</span>
-                            </div>
-                            <div className="flex justify-between gap-2">
-                              <span className="text-slate-400">Outstanding:</span>
-                              <span className="font-black text-blue-600">₹{loan.outstandingAmount?.toLocaleString("en-IN")}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-emerald-50 text-emerald-700 text-center rounded-lg py-1 px-2 font-bold text-[10px]">
-                            ✓ All EMI Paid
-                          </div>
-                        )}
+                       
+{loan.pendingEmis > 0 ? (
+  <div className="space-y-1 text-[11px]">
+    <div className="flex justify-between gap-2">
+      <span className="text-slate-400">Pending EMI:</span>
+      <span className="font-black text-red-600">
+        {loan.pendingEmis}
+      </span>
+    </div>
+
+    <div className="flex justify-between gap-2">
+      <span className="text-slate-400">Pending Int:</span>
+      <span className="font-black text-orange-600">
+        ₹{(loan.pendingInterest || 0).toLocaleString("en-IN")}
+      </span>
+    </div>
+
+    <div className="flex justify-between gap-2">
+      <span className="text-slate-400">Outstanding:</span>
+      <span className="font-black text-blue-600">
+        ₹{(loan.outstandingAmount || 0).toLocaleString("en-IN")}
+      </span>
+    </div>
+  </div>
+
+) : loan.currentEmiStatus === "ALL EMI COLLECTED" ? (
+  <div className="bg-emerald-50 text-emerald-700 text-center rounded-lg py-1 px-2 font-bold text-[10px]">
+    ✓ All EMI Paid
+  </div>
+) : loan.nextDueDate &&
+  new Date(loan.nextDueDate).getMonth() === new Date().getMonth() &&
+  new Date(loan.nextDueDate).getFullYear() === new Date().getFullYear() ? (
+  <div className="bg-amber-50 text-amber-700 text-center rounded-lg py-1 px-2 font-bold text-[10px]">
+    EMI Due This Month: {new Date(loan.nextDueDate).toLocaleDateString("en-IN")}
+  </div>
+) : (
+  <div className="bg-blue-50 text-blue-700 text-center rounded-lg py-1 px-2 font-bold text-[10px]">
+    No EMI Due
+  </div>
+)
+}
+
                       </td>
 
                       <td className="py-4 px-6 text-center">
@@ -558,7 +589,11 @@ const LoanList = () => {
                   <div>
                     <span className="text-[10px] text-slate-400 font-bold uppercase block">Pending EMIs</span>
                     <span className={`font-black ${loan.pendingEmis > 0 ? "text-rose-600" : "text-emerald-600"}`}>
-                      {loan.pendingEmis > 0 ? `${loan.pendingEmis} Pending` : "Fully Paid"}
+                      {loan.pendingEmis > 0
+  ? `${loan.pendingEmis} Pending`
+  : loan.currentEmiStatus === "ALL EMI COLLECTED"
+    ? "All EMI Paid"
+    : "No EMI Due"}
                     </span>
                   </div>
                 </div>

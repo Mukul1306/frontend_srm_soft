@@ -12,6 +12,113 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
+  
+
+useEffect(() => {
+  if (loading || !data?.member?.memberName) return;
+
+  const memberName = data.member.memberName.trim();
+  if (!memberName || !("speechSynthesis" in window)) return;
+
+  let memberId;
+
+  try {
+    memberId = JSON.parse(
+      localStorage.getItem("member") || "{}"
+    )?._id;
+  } catch {
+    return;
+  }
+
+  if (!memberId) return;
+
+  const sessionKey = `srm_welcome_played_${memberId}`;
+
+  // Prevent replay on refresh or dashboard navigation.
+  if (sessionStorage.getItem(sessionKey) === "true") return;
+
+  let timer;
+  let cancelled = false;
+  let started = false;
+
+  const speakWelcome = () => {
+    if (cancelled || started) return;
+
+    const voices = window.speechSynthesis.getVoices();
+
+    // Prefer a female-sounding English voice if available.
+    const voice =
+      voices.find(
+        (v) =>
+          /female|samantha|zira|aria|jenny|susan|heera/i.test(v.name) &&
+          /^en(-|$)/i.test(v.lang)
+      ) ||
+      voices.find((v) => /^en-IN$/i.test(v.lang)) ||
+      voices.find((v) => /^en/i.test(v.lang));
+
+    const greeting = new SpeechSynthesisUtterance(
+      `Welcome to S R M Finance, ${memberName}. ` +
+      "Have a wonderful day!"
+    );
+
+    greeting.voice = voice || null;
+    greeting.lang = voice?.lang || "en-IN";
+    greeting.rate = 0.88;
+    greeting.pitch = 1.12;
+    greeting.volume = 1;
+
+    greeting.onstart = () => {
+      // Mark only when speech actually starts.
+      started = true;
+      sessionStorage.setItem(sessionKey, "true");
+    };
+
+    greeting.onerror = () => {
+      // Allow a retry if speech fails before starting.
+      if (!started) {
+        sessionStorage.removeItem(sessionKey);
+      }
+    };
+
+    window.speechSynthesis.speak(greeting);
+  };
+
+  const handleVoicesChanged = () => {
+    if (cancelled || started) return;
+
+    if (window.speechSynthesis.getVoices().length > 0) {
+      window.speechSynthesis.removeEventListener(
+        "voiceschanged",
+        handleVoicesChanged
+      );
+
+      timer = setTimeout(speakWelcome, 500);
+    }
+  };
+
+  // Wait for voices to load on browsers that load them asynchronously.
+  if (window.speechSynthesis.getVoices().length > 0) {
+    timer = setTimeout(speakWelcome, 500);
+  } else {
+    window.speechSynthesis.addEventListener(
+      "voiceschanged",
+      handleVoicesChanged
+    );
+  }
+
+  return () => {
+    cancelled = true;
+    clearTimeout(timer);
+
+    window.speechSynthesis.removeEventListener(
+      "voiceschanged",
+      handleVoicesChanged
+    );
+  };
+}, [loading, data?.member?.memberName]);
+
+
+
   const fetchDashboard = async () => {
     try {
       const member = JSON.parse(
@@ -55,36 +162,12 @@ function Dashboard() {
     );
   }
 
-  /*
-  ==================================================
-  MULTIPLE SAVING ACCOUNTS
-  ==================================================
-  */
 
   const savings = data.savings || [];
 
-  /*
-  ==================================================
-  MULTIPLE LOAN ACCOUNTS
-  ==================================================
-  */
-
+  
   const loans = data.loans || [];
-
-  /*
-  ==================================================
-  SAFE DASHBOARD TOTALS
-  ==================================================
-  */
-
   const dashboard = data.dashboard || {};
-
-  /*
-  ==================================================
-  TOTAL PENDING DAYS
-  ==================================================
-  */
-
   const totalPendingDays = savings.reduce(
     (total, saving) =>
       total + Number(saving.pendingDays || 0),
