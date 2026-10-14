@@ -205,10 +205,17 @@ function RequireAuth({ allowedRoles }) {
   return <Outlet />;
 }
 
+
 function LoginRedirect() {
   const session = getSavedSession();
-  return <Navigate to={session?.home || "/"} replace />;
+
+  if (!session) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Navigate to={session.home} replace />;
 }
+
 
 
 function App() {
