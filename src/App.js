@@ -1,7 +1,11 @@
+
 import {
   BrowserRouter,
   Routes,
-  Route
+  Route,
+  Navigate,
+  Outlet,
+  useLocation,
 } from "react-router-dom";
 
 // =====================================================
@@ -153,6 +157,60 @@ import SocietyMemberProfile
 // APP
 // =====================================================
 
+
+
+
+const ROLE_HOME = {
+  ADMIN: "/dashboard",
+  AGENT: "/agent/dashboard",
+  MEMBER: "/user/dashboard",
+  SOCIETY_MEMBER: "/society-member/dashboard",
+};
+
+function getSavedSession() {
+  try {
+    const role = localStorage.getItem("role");
+    const home = ROLE_HOME[role];
+
+    const token =
+      role === "SOCIETY_MEMBER"
+        ? localStorage.getItem("societyMemberToken")
+        : localStorage.getItem("token");
+
+    if (!home || !token) return null;
+
+    if (role === "AGENT" &&
+        !localStorage.getItem("agent")) return null;
+
+    if (role === "MEMBER" &&
+        !localStorage.getItem("member")) return null;
+
+    if (role === "SOCIETY_MEMBER" &&
+        !localStorage.getItem("societyMember")) return null;
+
+    return { role, token, home };
+  } catch {
+    return null;
+  }
+}
+
+function RequireAuth({ allowedRoles }) {
+  const location = useLocation();
+  const session = getSavedSession();
+
+  if (!session || !allowedRoles.includes(session.role)) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  return <Outlet />;
+}
+
+function LoginRedirect() {
+  const session = getSavedSession();
+  return <Navigate to={session?.home || "/"} replace />;
+}
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -163,17 +221,21 @@ function App() {
             LOGIN
         ================================================= */}
 
-        <Route
-          path="/"
-          element={<Login />}
-        />
+     <Route
+  path="/"
+  element={
+    getSavedSession()
+      ? <LoginRedirect />
+      : <Login />
+  }
+/>
 
 
         {/* =================================================
             ADMIN PORTAL
         ================================================= */}
-
-        <Route element={<Layout />}>
+<Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
+  <Route element={<Layout />}>
 
           {/* -------------------------------
               MAIN ADMIN
@@ -428,13 +490,15 @@ function App() {
           />
 
         </Route>
-
+</Route>
 
         {/* =================================================
             AGENT PORTAL
         ================================================= */}
 
-        <Route element={<AgentLayout />}>
+       <Route element={<RequireAuth allowedRoles={["AGENT"]} />}>
+  <Route element={<AgentLayout />}>
+
 
           <Route
             path="/agent/dashboard"
@@ -490,13 +554,15 @@ function App() {
           />
 
         </Route>
-
+</Route>
 
         {/* =================================================
             DAILY MEMBER PORTAL
         ================================================= */}
 
-        <Route element={<UserLayout />}>
+       <Route element={<RequireAuth allowedRoles={["MEMBER"]} />}>
+  <Route element={<UserLayout />}>
+
 
           <Route
             path="/user/dashboard"
@@ -549,13 +615,13 @@ function App() {
           />
 
         </Route>
-
+</Route>
 
         {/* =================================================
             SOCIETY MEMBER PORTAL
         ================================================= */}
-
-       <Route element={<SocietyMemberLayout />}>
+<Route element={<RequireAuth allowedRoles={["SOCIETY_MEMBER"]} />}>
+  <Route element={<SocietyMemberLayout />}>
 
   <Route
     path="/society-member/dashboard"
@@ -586,6 +652,7 @@ function App() {
 
 </Route>
 
+</Route>
       </Routes>
 
     </BrowserRouter>
