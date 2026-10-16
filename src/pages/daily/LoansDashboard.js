@@ -145,7 +145,7 @@ useEffect(() => {
 
   const loadLoans = async () => {
     try {
-      const res = await axios.get("https://aws.srmfinance.online/api/daily/loans");
+      const res = await axios.get("https://finance-project-0qqk.onrender.com/api/daily/loans");
       setLoans(res.data?.loans || []);
     } catch (error) {
       console.error("Error fetching credit loans registry portfolio:", error);
@@ -156,7 +156,7 @@ useEffect(() => {
   const loadDashboard = async () => {
     try {
       const res = await axios.get(
-        `https://aws.srmfinance.online/api/daily/loan-dashboard?loanType=${loanType}`
+        `https://finance-project-0qqk.onrender.com/api/daily/loan-dashboard?loanType=${loanType}`
       );
       if (res.data?.dashboard) {
         setDashboard(res.data.dashboard);
@@ -186,7 +186,7 @@ const closeLoan = async (loan) => {
 
   try {
     await axios.put(
-      `https://aws.srmfinance.online/api/daily/close-loan/${loan._id}`
+      `https://finance-project-0qqk.onrender.com/api/daily/close-loan/${loan._id}`
     );
 
     alert("Loan closed successfully.");
@@ -245,7 +245,7 @@ const closeLoan = async (loan) => {
     try {
       setRequestLoading(true);
       const res = await axios.get(
-        "https://aws.srmfinance.online/api/daily/loan-requests"
+        "https://finance-project-0qqk.onrender.com/api/daily/loan-requests"
       );
 
      const requests = res.data?.requests || [];
@@ -273,7 +273,7 @@ setPendingRequests(
     setRequestLoading(true);
 
     const res = await axios.get(
-      "https://aws.srmfinance.online/api/daily/loan-requests"
+      "https://finance-project-0qqk.onrender.com/api/daily/loan-requests"
     );
 
     const requests = res.data?.requests || [];
@@ -312,7 +312,7 @@ const approveTerminationRequest = async (requestId) => {
     setRequestActionLoading(true);
 
     await axios.put(
-      `https://aws.srmfinance.online/api/daily/loan-termination-request/${requestId}/approve`
+      `https://finance-project-0qqk.onrender.com/api/daily/loan-termination-request/${requestId}/approve`
     );
 
     alert(
@@ -351,7 +351,7 @@ const rejectTerminationRequest = async (requestId) => {
     setRequestActionLoading(true);
 
     await axios.put(
-      `https://aws.srmfinance.online/api/daily/loan-termination-request/  ${requestId}/reject`,
+      `https://finance-project-0qqk.onrender.com/api/daily/loan-termination-request/  ${requestId}/reject`,
       {
         rejectionReason: reason,
       }
@@ -406,7 +406,7 @@ const rejectTerminationRequest = async (requestId) => {
       setRequestActionLoading(true);
 
       await axios.put(
-        `https://aws.srmfinance.online/api/daily/loan-request/${requestId}/approve`
+        `https://finance-project-0qqk.onrender.com/api/daily/loan-request/${requestId}/approve`
       );
 
       alert("Loan request approved successfully. The actual loan has been created.");
@@ -435,7 +435,7 @@ const rejectTerminationRequest = async (requestId) => {
       setRequestActionLoading(true);
 
       await axios.put(
-        `https://aws.srmfinance.online/api/daily/loan-request/${requestId}/reject`,
+        `https://finance-project-0qqk.onrender.com/api/daily/loan-request/${requestId}/reject`,
         { rejectionReason: reason }
       );
 

@@ -20,7 +20,7 @@ import {
 // =====================================================
 // AWS BACKEND
 // =====================================================
-const API_BASE = "https://aws.srmfinance.online/api/daily";
+const API_BASE = "https://finance-project-0qqk.onrender.com/api/daily";
 
 // =====================================================
 // DEFAULT RULE

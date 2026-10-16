@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const API_URL =
-  "https://aws.srmfinance.online/api/daily/penalty/management";
+  "https://finance-project-0qqk.onrender.com/api/daily/penalty/management";
 
 const PenaltyManagement = () => {
   const [cards, setCards] = useState({
