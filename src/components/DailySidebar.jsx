@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiHome,
   FiUsers,
@@ -20,6 +20,37 @@ import {
 
 function DailySidebar() {
   const location = useLocation();
+ 
+const navigate = useNavigate();
+
+
+const handleLogout = () => {
+  const confirmed = window.confirm(
+    "Are you sure you want to logout?"
+  );
+
+  if (!confirmed) return;
+
+  // Clear saved authentication data
+  const sessionKeys = [
+    "token",
+    "role",
+    "admin",
+    "agent",
+    "member",
+    "societyMember",
+    "societyMemberToken",
+  ];
+
+  sessionKeys.forEach((key) => {
+    localStorage.removeItem(key);
+  });
+
+  // Redirect to login page
+  navigate("/", { replace: true });
+};
+
+
 
   const menuClass = (path) => {
     const active = location.pathname === path;
@@ -172,13 +203,17 @@ function DailySidebar() {
             </div>
           </div>
 
-          <button 
-            type="button" 
-            aria-label="Logout"
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <FiLogOut size={18} />
-          </button>
+          
+<button
+  type="button"
+  onClick={handleLogout}
+  aria-label="Logout"
+  title="Logout"
+  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+>
+  <FiLogOut size={18} />
+</button>
+
         </div>
       </div>
 

@@ -14,14 +14,12 @@ import {
 } from "lucide-react";
 
 const API =
-  "https://aws.srmfinance.online/api/daily/salary";
+  "https://finance-project-0qqk.onrender.com/api/daily/salary";
 
 const AGENTS_API =
-  "https://aws.srmfinance.online/api/daily/agents";
+  "https://finance-project-0qqk.onrender.com/api/daily/agents";
 
-/* ----------------------------------------------------------------------
-   Design tokens — "Payroll Ledger"
----------------------------------------------------------------------- */
+
 
 const INK = "#101826";
 const PAPER = "#EEF1F5";
@@ -36,9 +34,7 @@ const RED_BG = "#F6E9E9";
 const GOLD = "#A67C27";
 const GOLD_BG = "#F3ECDD";
 
-/* ----------------------------------------------------------------------
-   Fonts
----------------------------------------------------------------------- */
+
 
 function useLedgerFonts() {
   useEffect(() => {
@@ -55,18 +51,13 @@ function useLedgerFonts() {
   }, []);
 }
 
-/* ======================================================================
-   MAIN COMPONENT
-====================================================================== */
 
 function SalaryManagement() {
   useLedgerFonts();
 
   const now = new Date();
 
-  /* --------------------------------------------------------------------
-     FILTERS
-  -------------------------------------------------------------------- */
+ 
 
   const [month, setMonth] = useState(
     now.getMonth() + 1

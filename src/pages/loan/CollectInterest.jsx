@@ -23,7 +23,12 @@ const CollectLoanEmi = () => {
   const [pendingEmis, setPendingEmis] = useState([]);
   const [selectedEmi, setSelectedEmi] = useState(null);
   const [history, setHistory] = useState([]);
-  
+  const [showAdditionalLoan, setShowAdditionalLoan] = useState(false);
+const [additionalAmount, setAdditionalAmount] = useState("");
+const [additionalMode, setAdditionalMode] = useState("Cash");
+const [additionalRemarks, setAdditionalRemarks] = useState("");
+const [isAddingPrincipal, setIsAddingPrincipal] = useState(false);
+
   const [formData, setFormData] = useState({
     paymentMode: "Cash",
     principalPaid: 0,
@@ -93,7 +98,56 @@ const CollectLoanEmi = () => {
     const emi = pendingEmis.find((item) => item.emiNo === Number(val));
     setSelectedEmi(emi || null);
   };
+const handleAddAdditionalPrincipal = async (e) => {
+  e.preventDefault();
 
+  const amount = Number(additionalAmount);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return alert("Enter a valid additional loan amount.");
+  }
+
+  const confirmed = window.confirm(
+    `Approve additional principal of ₹${amount.toLocaleString("en-IN")}?`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setIsAddingPrincipal(true);
+
+    const response = await axios.post(
+      `https://finance-project-0qqk.onrender.com/api/loans/${loanId}/additional-principal`,
+      {
+        amount,
+        paymentMode: additionalMode,
+        remarks: additionalRemarks,
+        disbursementDate: new Date().toISOString(),
+      }
+    );
+
+    alert(response.data.message || "Additional principal recorded.");
+
+    setAdditionalAmount("");
+    setAdditionalMode("Cash");
+    setAdditionalRemarks("");
+    setShowAdditionalLoan(false);
+
+    await Promise.all([
+      fetchLoan(),
+      fetchPendingEmis(),
+      fetchHistory(),
+    ]);
+  } catch (err) {
+    console.error("Additional principal error:", err);
+    alert(
+      err.response?.data?.message ||
+      "Unable to add additional principal."
+    );
+  } finally {
+    setIsAddingPrincipal(false);
+  }
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -167,6 +221,15 @@ const CollectLoanEmi = () => {
               Process monthly incoming member ledger payments with real-time interest computations.
             </p>
           </div>
+
+          <button
+  type="button"
+  onClick={() => setShowAdditionalLoan((prev) => !prev)}
+  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-xl shadow-sm transition-all"
+>
+  + Add Additional Principal
+</button>
+
           <button
             onClick={() => navigate("/loans")}
             className="bg-white border border-[#e2e8f0] hover:bg-slate-50 text-slate-700 font-bold text-sm px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
@@ -282,6 +345,107 @@ const CollectLoanEmi = () => {
           {/* RIGHT CONTAINER PANELS (ACTIONS + HISTORY LISTS) */}
           <div className="lg:col-span-2 space-y-6">
             
+
+{/* ADDITIONAL PRINCIPAL FORM */}
+{showAdditionalLoan && (
+  <div className="bg-white rounded-3xl border border-emerald-200 p-6 shadow-sm">
+    <div className="flex justify-between items-center mb-5">
+      <div>
+        <h2 className="text-base font-black text-slate-900 uppercase">
+          Add Additional Principal
+        </h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Record an additional amount issued against this loan.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setShowAdditionalLoan(false)}
+        className="text-slate-500 hover:text-red-600 font-bold"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form
+      onSubmit={handleAddAdditionalPrincipal}
+      className="space-y-4"
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 mb-2">
+            Additional Amount (₹)
+          </label>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            required
+            value={additionalAmount}
+            onChange={(e) => setAdditionalAmount(e.target.value)}
+            placeholder="Enter amount"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 mb-2">
+            Disbursement Mode
+          </label>
+          <select
+            value={additionalMode}
+            onChange={(e) => setAdditionalMode(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500"
+          >
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="UPI">UPI</option>
+            <option value="Cheque">Cheque</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-500 mb-2">
+          Remarks (Optional)
+        </label>
+        <textarea
+          value={additionalRemarks}
+          onChange={(e) => setAdditionalRemarks(e.target.value)}
+          rows={3}
+          placeholder="Reason or reference for additional principal"
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500"
+        />
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+        Interest on this additional amount should start from the next
+        applicable EMI date, according to your loan rules.
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => setShowAdditionalLoan(false)}
+          className="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          disabled={isAddingPrincipal}
+          className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold disabled:opacity-50"
+        >
+          {isAddingPrincipal ? "Processing..." : "Confirm Additional Principal"}
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
+
             {/* INCOMING COLLECTION CAPTURE PORT */}
             <div className="bg-white rounded-3xl border border-[#e2e8f0] p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">

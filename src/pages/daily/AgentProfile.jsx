@@ -61,7 +61,7 @@ const AgentProfile = () => {
   const fetchCashSummary = async () => {
     try {
       const res = await axios.get(
-        `https://aws.srmfinance.online/api/daily/cash-summary/${id}`
+        `https://finance-project-0qqk.onrender.com/api/daily/cash-summary/${id}`
       );
       setCashSummary(res.data);
     } catch (err) {
@@ -72,7 +72,7 @@ const AgentProfile = () => {
   const fetchDepositHistory = async () => {
     try {
       const res = await axios.get(
-        `https://aws.srmfinance.online/api/daily/deposit-history/${id}`
+        `https://finance-project-0qqk.onrender.com/api/daily/deposit-history/${id}`
       );
       setDepositHistory(res.data.deposits || []);
     } catch (err) {
@@ -90,7 +90,7 @@ const AgentProfile = () => {
     e.preventDefault();
     try {
       await axios.post(
-        "https://aws.srmfinance.online/api/daily/receive-money",
+        "https://finance-project-0qqk.onrender.com/api/daily/receive-money",
         {
           agentId: id,
           amount: Number(receiveForm.amount),

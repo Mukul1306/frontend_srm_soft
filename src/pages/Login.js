@@ -24,7 +24,7 @@ const handleLogin = async (e) => {
     setLoggingIn(true);
 
     const response = await axios.post(
-      "https://aws.srmfinance.online/api/auth/login",
+      "https://finance-project-0qqk.onrender.com/api/auth/login",
       {
         mobile: mobile.trim(),
         password,

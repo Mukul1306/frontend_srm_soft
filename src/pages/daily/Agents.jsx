@@ -139,12 +139,12 @@ function Agents() {
     try {
       if (isEdit) {
         await axios.put(
-          `https://aws.srmfinance.online/api/daily/agent/${editingId}`,
+          `https://finance-project-0qqk.onrender.com/api/daily/agent/${editingId}`,
           payload
         );
       } else {
         await axios.post(
-          "https://aws.srmfinance.online/api/daily/add-agent",
+          "https://finance-project-0qqk.onrender.com/api/daily/add-agent",
           payload
         );
       }

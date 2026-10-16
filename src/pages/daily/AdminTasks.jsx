@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-const API = "https://aws.srmfinance.online/api/daily";
+const API = "https://finance-project-0qqk.onrender.com/api/daily";
 
 const statusClass = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
