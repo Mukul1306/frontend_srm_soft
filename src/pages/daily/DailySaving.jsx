@@ -4,7 +4,6 @@ import axios from "axios";
 function DailySaving() {
   const [showModal, setShowModal] = useState(false);
   const [areas, setAreas] = useState([]);
-  const [agents, setAgents] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,23 +16,11 @@ const [formData, setFormData] = useState({
   durationType: "DAYS",
   maxMembers: "",
   startDate: "",
-  assignedAgent: "",
-  secondaryAgent: "",
 });
 
   useEffect(() => {
     fetchAreas();
-    fetchAgents();
   }, []);
-
-  const fetchAgents = async () => {
-    try {
-      const res = await axios.get("https://finance-project-0qqk.onrender.com/api/daily/agents");
-      setAgents(res.data.agents || []);
-    } catch (error) {
-      console.log("Error fetching agents:", error);
-    }
-  };
 
   const fetchAreas = async () => {
     try {
@@ -53,8 +40,6 @@ const [formData, setFormData] = useState({
   durationType: "DAYS",
   maxMembers: "",
   startDate: "",
-  assignedAgent: "",
-  secondaryAgent: "",
 });
     setEditingId(null);
     setShowModal(false);
@@ -73,10 +58,6 @@ const [formData, setFormData] = useState({
   maxMembers: area.maxMembers,
 
   startDate: area.startDate?.substring(0,10) || "",
-
-  assignedAgent: area.assignedAgent?._id || "",
-
-  secondaryAgent: area.secondaryAgent?._id || ""
 
 });
     setShowModal(true);
@@ -112,10 +93,6 @@ const [formData, setFormData] = useState({
   maxMembers: Number(formData.maxMembers),
 
   startDate: formData.startDate,
-
-  assignedAgent: formData.assignedAgent,
-
-  secondaryAgent: formData.secondaryAgent || null,
 
 };
 
@@ -165,7 +142,7 @@ const [formData, setFormData] = useState({
             DAILY SAVINGS MANAGEMENT
           </h1>
           <p className="text-sm text-slate-500 font-medium mt-0.5">
-            Manage your daily collection areas, assigned local agents, and operational targets.
+            Manage your daily collection areas and operational targets.
           </p>
         </div>
 
@@ -187,7 +164,7 @@ const [formData, setFormData] = useState({
           </span>
           <input
             type="text"
-            placeholder="Search areas, locations, or agents..."
+            placeholder="Search areas or locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border border-slate-200/80 rounded-xl pl-11 pr-4 py-2.5 w-[380px] text-sm font-medium bg-white focus:outline-none focus:border-blue-500 shadow-sm"
@@ -238,7 +215,6 @@ const [formData, setFormData] = useState({
                           {area.areaName}
                         </h2>
                         <p className="text-[12px] text-slate-400 font-bold mt-0.5">
-                          Agents: <span className="text-slate-600 font-medium">{area.assignedAgent?.name || "Unassigned"}</span>
                         </p>
                       </div>
                     </div>
@@ -344,7 +320,7 @@ const [formData, setFormData] = useState({
               {editingId ? "Modify Daily Area Group" : "Initialize New Daily Area"}
             </h2>
             <p className="text-slate-400 text-[13px] mb-6 font-medium leading-relaxed">
-              Configure an area-based daily saving pool and assign field agents.
+              Configure an area-based daily saving pool.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -453,45 +429,6 @@ const [formData, setFormData] = useState({
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                   className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500 bg-slate-50/50 text-slate-700"
                 />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Primary Agent
-                </label>
-                <select
-                  required
-                  value={formData.assignedAgent}
-                  onChange={(e) => setFormData({ ...formData, assignedAgent: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500 bg-white text-slate-700 shadow-sm cursor-pointer"
-                >
-                  <option value="" disabled hidden>Select Agent</option>
-                  {agents.map((agent) => (
-                    <option key={agent._id} value={agent._id}>
-                      {agent.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Secondary Agent
-                </label>
-                <select
-                  value={formData.secondaryAgent}
-                  onChange={(e) => setFormData({ ...formData, secondaryAgent: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500 bg-white text-slate-700 shadow-sm cursor-pointer"
-                >
-                  <option value="">Select Secondary Agent (Optional)</option>
-                  {agents
-                    .filter((agent) => agent._id !== formData.assignedAgent)
-                    .map((agent) => (
-                      <option key={agent._id} value={agent._id}>
-                        {agent.name}
-                      </option>
-                    ))}
-                </select>
               </div>
 
               {/* Actions Interface Row Component Panel */}

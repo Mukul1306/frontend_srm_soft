@@ -239,11 +239,6 @@ function DailyMemberProfile() {
  />
 
 <InfoItem
-  label="Assigned Agent"
-  value={member.assignedAgent?.name || "-"}
- />
-
-<InfoItem
   label="Email Address"
   value={member.email || "-"}
   colSpan="col-span-2"
@@ -273,7 +268,6 @@ function DailyMemberProfile() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 text-xs sm:text-sm">
             <InfoItem label="Area Group" value={saving.areaGroup?.areaName} />
-            <InfoItem label="Assigned Agent" value={saving.assignedAgent?.name} />
             <InfoItem label="Collection Type" value={saving.collectionType} />
             <InfoItem
   label="Grace Period"
@@ -324,7 +318,6 @@ function DailyMemberProfile() {
             <InfoItem label="Interest Rate" value={`${loan.interestRate}%`} />
             <InfoItem label="EMI Amount" value={formatCurrency(loan.emiAmount)} />
             <InfoItem label="Loan Type" value={loan.loanType} />
-            <InfoItem label="Assigned Agent" value={loan.assignedAgent?.name || "-"} />
             <InfoItem label="Disbursal Date" value={formatDate(loan.loanDate)} />
             <InfoItem label="Paid Installments" value={loan.completedInstallments} color="text-emerald-600" />
             <InfoItem label="Pending Installments" value={loan.pendingInstallments} color="text-rose-600" />

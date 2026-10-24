@@ -7,13 +7,11 @@ import React, {
 import axios from "axios";
 
 import {
-  Users,
   UserCheck,
   Wallet,
   Landmark,
   TrendingUp,
   TrendingDown,
-  Award,
   History,
   AlertCircle,
   RefreshCw,
@@ -207,7 +205,7 @@ export default function Dashboard() {
 
   const todayActual =
     Number(
-      data.todayActualAgentCollection || 0
+      data.todayActualCollection || 0
     );
 
   const targetRemaining =
@@ -472,29 +470,6 @@ export default function Dashboard() {
 
             <MetricCard
 
-              title="Active Agents"
-
-              subtitle="Field operators"
-
-              value={formatNumber(data.totalAgents)}
-
-              icon={
-                <Users
-                  size={18}
-                />
-              }
-
-              iconColor="text-blue-600"
-
-              iconBg="bg-blue-50"
-
-              accent="border-blue-500"
-
-            />
-
-
-            <MetricCard
-
               title="Enrolled Members"
 
               subtitle="Registered accounts"
@@ -535,29 +510,6 @@ export default function Dashboard() {
               iconBg="bg-violet-50"
 
               accent="border-violet-500"
-
-            />
-
-
-            <MetricCard
-
-              title="Total Collection"
-
-              subtitle="All-time agent inflow"
-
-              value={formatCurrency(data.totalAgentCollection)}
-
-              icon={
-                <Wallet
-                  size={18}
-                />
-              }
-
-              iconColor="text-emerald-600"
-
-              iconBg="bg-emerald-50"
-
-              accent="border-emerald-500"
 
             />
 
@@ -727,7 +679,7 @@ export default function Dashboard() {
               subtitle="Physically received today"
 
               value={formatCurrency(
-                data.todayActualAgentCollection
+                data.todayActualCollection
               )}
 
               icon={
@@ -1377,152 +1329,6 @@ export default function Dashboard() {
 
           </div>
 
-
-          {/* ===============================================
-              TOP AGENTS
-          =============================================== */}
-
-          <div
-            className="
-              bg-white
-              rounded-3xl
-              border
-              border-slate-200
-              shadow-sm
-              overflow-hidden
-            "
-          >
-
-            <PanelHeader
-
-              icon={
-                <Award
-                  size={16}
-                />
-              }
-
-              title="Top Agents"
-
-              subtitle="Highest lifetime saving collections"
-
-            />
-
-
-            {data.topAgents &&
-            data.topAgents.length > 0 ? (
-
-              <div className="p-4 space-y-2">
-
-                {data.topAgents.map(
-                  (agent, index) => (
-
-                    <div
-                      key={
-                        agent._id ||
-                        index
-                      }
-                      className="
-                        group
-                        flex
-                        items-center
-                        justify-between
-                        gap-3
-                        p-3
-                        rounded-2xl
-                        border
-                        border-slate-100
-                        hover:border-blue-100
-                        hover:bg-blue-50/40
-                        transition-all
-                      "
-                    >
-
-                      <div className="flex items-center gap-3 min-w-0">
-
-                        <div
-                          className="
-                            w-9
-                            h-9
-                            rounded-xl
-                            bg-slate-100
-                            text-slate-700
-                            flex
-                            items-center
-                            justify-center
-                            text-xs
-                            font-black
-                            shrink-0
-                          "
-                        >
-
-                          {index + 1}
-
-                        </div>
-
-
-                        <div className="min-w-0">
-
-                          <p
-                            className="
-                              text-sm
-                              font-black
-                              text-slate-900
-                              truncate
-                            "
-                          >
-
-                            {agent.agent?.[0]?.name ||
-                              "Unassigned Agent"}
-
-                          </p>
-
-                          <p className="text-[10px] text-slate-400 mt-0.5">
-
-                            Collection Agent
-
-                          </p>
-
-                        </div>
-
-                      </div>
-
-
-                      <div className="text-right shrink-0">
-
-                        <p className="text-sm font-black text-emerald-600">
-
-                          {formatCurrency(
-                            agent.totalCollection
-                          )}
-
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  )
-                )}
-
-              </div>
-
-            ) : (
-
-              <EmptyState
-
-                icon={
-                  <Award size={24} />
-                }
-
-                title="No Agent Data"
-
-                text="Agent collection rankings will appear here."
-
-              />
-
-            )}
-
-          </div>
 
         </section>
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-const API = "https://aws.srmfinance.online/api/daily";
+const API = "https://finance-project-0qqk.onrender.com/api/daily";
 
 function EditMember() {
   const { id } = useParams();
@@ -44,12 +44,26 @@ function EditMember() {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${API}/member/${id}`);
+      if (!id) {
+        throw new Error("Member ID is missing from the page URL.");
+      }
 
-      const member = res.data?.member;
+      const res = await axios.get(
+        `${API}/member/${encodeURIComponent(id)}`
+      );
 
-      if (!member) {
-        alert("Member not found");
+      // Support the response shapes used by the daily API:
+      // { member: {...} }, { data: { member: {...} } }, or the member directly.
+      const member =
+        res.data?.member ??
+        res.data?.data?.member ??
+        res.data?.data ??
+        res.data;
+
+      if (!member || typeof member !== "object" || Array.isArray(member) ||
+          !(member._id || member.memberId || member.memberName)) {
+        console.error("Unexpected member details response:", res.data);
+        alert("Member details were not found in the server response.");
         navigate("/daily/members");
         return;
       }
@@ -89,10 +103,15 @@ function EditMember() {
     } catch (error) {
       console.error("Fetch member error:", error);
 
-      alert(
-        error.response?.data?.message ||
-          "Failed to load member details"
-      );
+      const status = error.response?.status;
+      const serverMessage = error.response?.data?.message;
+      const message = !error.response
+        ? "Cannot connect to the server. Check the API URL or network and try again."
+        : status === 404
+          ? "Member details endpoint or member was not found (404). Check the member API route and ID."
+          : serverMessage || `Failed to load member details (HTTP ${status}).`;
+
+      alert(error.message?.includes("Member ID is missing") ? error.message : message);
     } finally {
       setLoading(false);
     }
@@ -556,10 +575,6 @@ function EditMember() {
                       value={area._id}
                     >
                       {area.areaName}
-
-                      {area.assignedAgent?.name
-                        ? ` — ${area.assignedAgent.name}`
-                        : ""}
                     </option>
                   ))}
                 </select>

@@ -658,8 +658,6 @@ function LoanDetails() {
                 <Info label="Registered Mobile" value={loan.mobile} />
                 <Info label="Member ID" value={loan.member?.memberId} />
                 <Info label="Area" value={loan.areaName} />
-                <Info label="Assigned Agent" value={loan.assignedAgent?.name} />
-                <Info label="Agent Mobile" value={loan.assignedAgent?.mobile} />
                 <Info label="Assigned Area Node" value={loan.areaName} />
                 <Info
                   label="Residential Address"

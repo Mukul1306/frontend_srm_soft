@@ -16,10 +16,10 @@ import {
   Ban,
   Pencil,
   Loader2,
-  Inbox,
   ShieldCheck,
   UserRound,
   Eye,
+  Inbox,
   FileText,
   X,
 } from "lucide-react";
@@ -135,10 +135,6 @@ function CollectPaymentModal({ saving, open, onClose, refresh }) {
 
   const [error, setError] =
     useState("");
-
-  /* =========================================================
-     LOAD PENDING DAYS
-  ========================================================= */
 
   useEffect(() => {
     if (open && saving?._id) {
@@ -521,16 +517,6 @@ function CollectPaymentModal({ saving, open, onClose, refresh }) {
               </p>
             </div>
 
-            <div>
-              <p className="text-[10px] font-bold uppercase text-stone-400">
-                Assigned Agent
-              </p>
-
-              <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800">
-                {saving?.assignedAgent?.name ||
-                  "--"}
-              </p>
-            </div>
 
           </div>
 
@@ -1168,10 +1154,6 @@ function MemberCard({ item, onCollect, onEdit, onTerminate, onViewDetails }) {
           <MapPin size={12} className="shrink-0 text-stone-400" />
           <span className="truncate">{item.areaGroup?.areaName || "—"}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-stone-500 min-w-0">
-          <UserRound size={12} className="shrink-0 text-stone-400" />
-          <span className="truncate">{item.assignedAgent?.name || "—"}</span>
-        </div>
         {item.member?.mobile && (
           <div className="flex items-center gap-1.5 text-stone-500 col-span-2">
             <Phone size={12} className="shrink-0 text-stone-400" />
@@ -1234,22 +1216,14 @@ function AdminCollections() {
   // ==========================================
   // DAILY SAVING REQUESTS
   // ==========================================
-  const [savingRequests, setSavingRequests] = useState([]);
-  const [showSavingRequests, setShowSavingRequests] = useState(false);
-  const [loadingSavingRequests, setLoadingSavingRequests] = useState(false);
-  const [processingRequestId, setProcessingRequestId] = useState(null);
 
   // Pending request details
-  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
-  const [selectedSavingRequest, setSelectedSavingRequest] = useState(null);
 
   const [summary, setSummary] = useState({
     todayTarget: 0,
     todayCollected: 0,
     pendingAmount: 0,
     pendingMembers: 0,
-    agentCollection: 0,
-    selfCollection: 0,
   });
 
   const firstLoadRef = useRef(true);
@@ -1295,189 +1269,6 @@ function AdminCollections() {
     }
   };
 
-  // ==========================================
-  // LOAD PENDING SAVING REQUESTS
-  // ==========================================
-  const fetchSavingRequests = async () => {
-    try {
-      setLoadingSavingRequests(true);
-
-      const res = await axios.get(`${API_BASE}/saving-requests`);
-
-      setSavingRequests(res.data?.requests || []);
-    } catch (error) {
-      console.error("GET SAVING REQUESTS ERROR:", error);
-
-      alert(error.response?.data?.message || "Unable to load saving requests.");
-    } finally {
-      setLoadingSavingRequests(false);
-    }
-  };
-
-  const handleOpenSavingRequests = async () => {
-    setShowSavingRequests(true);
-    await fetchSavingRequests();
-  };
-
-  const handleViewSavingRequest = (request) => {
-    setSelectedSavingRequest(request);
-    setShowRequestDetailsModal(true);
-  };
-
-  const closeSavingRequestDetails = () => {
-    setShowRequestDetailsModal(false);
-    setSelectedSavingRequest(null);
-  };
-
-  const handleViewDetails = async (item) => {
-    try {
-      setShowDetailsModal(true);
-      setDetailsLoading(true);
-
-      setDetailsMember(null);
-      setDetailsSaving(null);
-      setDetailsTransactions([]);
-
-      const response = await axios.get(`${API_BASE}/saving-details/${item._id}`);
-
-      setDetailsMember(response.data?.member || null);
-      setDetailsSaving(response.data?.saving || null);
-      setDetailsTransactions(response.data?.transactions || []);
-    } catch (error) {
-      console.error("MEMBER DETAILS ERROR:", error);
-
-      alert(error.response?.data?.message || "Unable to load member details.");
-
-      setShowDetailsModal(false);
-    } finally {
-      setDetailsLoading(false);
-    }
-  };
-
-  // ==========================================
-  // APPROVE SAVING REQUEST
-  // ==========================================
- const handleApproveSavingRequest = async (request) => {
-  const memberName =
-    request?.member?.memberName ||
-    "this member";
-
-  const isTermination =
-    request?.requestType === "TERMINATION";
-
-  const message = isTermination
-    ? `Approve termination of ${memberName}'s Daily Saving Account?`
-    : `Approve Daily Saving request for ${memberName}?`;
-
-  const confirmed =
-    window.confirm(message);
-
-  if (!confirmed) return;
-
-  try {
-    setProcessingRequestId(request._id);
-
-    await axios.put(
-      `${API_BASE}/saving-request/${request._id}/approve`
-    );
-
-    alert(
-      isTermination
-        ? "Daily Saving Termination Approved Successfully."
-        : "Daily Saving Request Approved Successfully."
-    );
-
-    await fetchSavingRequests();
-    await fetchMembers();
-    await fetchSummary();
-
-  } catch (error) {
-    console.error(
-      "APPROVE SAVING REQUEST ERROR:",
-      error
-    );
-
-    alert(
-      error.response?.data?.message ||
-      "Unable to approve saving request."
-    );
-
-  } finally {
-    setProcessingRequestId(null);
-  }
-};
-
-  // ==========================================
-  // REJECT SAVING REQUEST
-  // ==========================================
-const handleRejectSavingRequest = async (request) => {
-  const memberName =
-    request?.member?.memberName ||
-    "this member";
-
-  const isTermination =
-    request?.requestType === "TERMINATION";
-
-  const requestLabel = isTermination
-    ? "termination request"
-    : "Daily Saving request";
-
-  const rejectionReason =
-    window.prompt(
-      `Enter rejection reason for ${memberName}:`
-    );
-
-  if (rejectionReason === null) {
-    return;
-  }
-
-  const reason =
-    rejectionReason.trim() ||
-    "Rejected by Admin";
-
-  const confirmed =
-    window.confirm(
-      `Reject ${requestLabel} for ${memberName}?`
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    setProcessingRequestId(request._id);
-
-    await axios.put(
-      `${API_BASE}/saving-request/${request._id}/reject`,
-      {
-        rejectionReason: reason,
-      }
-    );
-
-    alert(
-      isTermination
-        ? "Termination Request Rejected Successfully."
-        : "Daily Saving Request Rejected Successfully."
-    );
-
-    await fetchSavingRequests();
-
-  } catch (error) {
-    console.error(
-      "REJECT SAVING REQUEST ERROR:",
-      error
-    );
-
-    alert(
-      error.response?.data?.message ||
-      "Unable to reject saving request."
-    );
-
-  } finally {
-    setProcessingRequestId(null);
-  }
-};
-
   const handleTerminate = async (saving) => {
     const reason = window.prompt(`Enter termination reason for ${saving.member?.memberName}:`);
     if (!reason) return;
@@ -1511,6 +1302,21 @@ const handleRejectSavingRequest = async (request) => {
   const handleEdit = (item) => {
     navigate(`/daily/edit-saving/${item._id}`);
   };
+
+  const handleViewDetails = async (item) => {
+  if (!item) return;
+
+  setShowDetailsModal(true);
+  setDetailsLoading(false);
+
+  // Load the member and saving account already available
+  // in the collection list.
+  setDetailsMember(item.member || null);
+  setDetailsSaving(item);
+
+  // Transaction history requires a separate API request.
+  setDetailsTransactions([]);
+};
 
   const areaOptions = useMemo(
     () => ["ALL", ...new Set(members.map((item) => item.areaGroup?.areaName).filter(Boolean))],
@@ -1577,24 +1383,11 @@ const handleRejectSavingRequest = async (request) => {
               Collection Overview
             </h1>
             <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 sm:mt-2 max-w-xl">
-              Track today's field collections, settle open installments, and keep every member's passbook up to date.
+              Track daily collections, settle open installments, and keep every member's passbook up to date.
             </p>
           </div>
 
           <div className="flex flex-col xs:flex-row gap-2.5 w-full lg:w-auto shrink-0">
-            <button
-              onClick={handleOpenSavingRequests}
-              className="relative w-full xs:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-lg transition-all duration-200"
-            >
-              <Inbox size={16} className="sm:w-[18px] sm:h-[18px]" strokeWidth={2.5} />
-              <span>Pending Requests</span>
-              {savingRequests.length > 0 && (
-                <span className="min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-black">
-                  {savingRequests.length}
-                </span>
-              )}
-            </button>
-
             <button
               onClick={() => goTo("/daily/create-saving")}
               className="w-full xs:w-auto inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-emerald-950 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-lg transition-all duration-200 hover:scale-[1.02]"
@@ -1623,8 +1416,7 @@ const handleRejectSavingRequest = async (request) => {
         </div>
 
         {/* Secondary KPIs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
-          <KpiCard icon={UserRound} label="Agent Collection" value={formatINR(summary.agentCollection)} accent="teal" />
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <KpiCard icon={ShieldCheck} label="Active Accounts" value={activeMembers} accent="stone" />
           <KpiCard icon={Wallet} label="Total Collection" value={formatINR(totalCollection)} accent="emerald" />
           <KpiCard icon={AlertTriangle} label="Outstanding" value={formatINR(totalPending)} accent="rose" />
@@ -1715,7 +1507,6 @@ const handleRejectSavingRequest = async (request) => {
                     <tr className="bg-stone-900 text-[10px] sm:text-[11px] font-bold text-stone-300 uppercase tracking-wider">
                       <th className="p-3.5 sm:p-4">Member</th>
                       <th className="p-3.5 sm:p-4">Area</th>
-                      <th className="p-3.5 sm:p-4">Agent</th>
                       <th className="p-3.5 sm:p-4 text-right">Daily Commitment</th>
                       <th className="p-3.5 sm:p-4 text-right">Collected</th>
                       <th className="p-3.5 sm:p-4 text-center">Pending Days</th>
@@ -1756,7 +1547,6 @@ const handleRejectSavingRequest = async (request) => {
                               {item.areaGroup?.areaName || "—"}
                             </span>
                           </td>
-                          <td className="p-3.5 sm:p-4 text-stone-600 font-medium truncate">{item.assignedAgent?.name || "—"}</td>
                           <td className="p-3.5 sm:p-4 text-right font-bold text-stone-700 whitespace-nowrap" style={{ fontVariantNumeric: "tabular-nums" }}>
                             {formatINR(item.collectionType === "FIXED" ? item.fixedAmount : 0)}
                           </td>
@@ -1929,12 +1719,6 @@ const handleRejectSavingRequest = async (request) => {
                           {detailsSaving?.endDate ? new Date(detailsSaving.endDate).toLocaleDateString("en-IN") : "—"}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-[9px] sm:text-[10px] font-bold uppercase text-stone-400 truncate">Assigned Agent</p>
-                        <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800 truncate">
-                          {detailsSaving?.assignedAgent?.name || selectedSaving?.assignedAgent?.name || "—"}
-                        </p>
-                      </div>
                     </div>
                   </section>
 
@@ -1997,7 +1781,7 @@ const handleRejectSavingRequest = async (request) => {
                                   </span>
                                 </td>
                                 <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold whitespace-nowrap">
-                                  {tx.collectorType === "ADMIN" ? "Admin" : "Agent"}
+                                  {tx.collectorType === "ADMIN" ? "Admin" : "Legacy collector"}
                                 </td>
                               </tr>
                             ))}
@@ -2008,417 +1792,6 @@ const handleRejectSavingRequest = async (request) => {
                   </section>
                 </>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==========================================
-          PENDING SAVING REQUESTS MODAL
-      ========================================== */}
-      {showSavingRequests && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-5">
-          <div className="w-full max-w-6xl max-h-[92vh] overflow-hidden rounded-2xl bg-white shadow-2xl border border-stone-200 flex flex-col">
-            <div className="flex items-center justify-between gap-3 bg-gradient-to-br from-emerald-900 to-emerald-700 px-4 sm:px-6 py-3.5 sm:py-4 shrink-0">
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">Admin Approval</p>
-            <h3 className="text-base sm:text-xl font-bold text-white truncate">
-  Pending Daily Saving Requests
-</h3>
-
-<p className="text-[10px] sm:text-[11px] text-emerald-100 mt-0.5 truncate">
-  Review account creation and termination requests submitted by agents.
-</p>
-              </div>
-
-              <button type="button" onClick={() => setShowSavingRequests(false)} className="shrink-0 rounded-lg p-1.5 text-white hover:bg-white/10">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 sm:p-5">
-              {loadingSavingRequests ? (
-                <div className="py-12 sm:py-16 text-center">
-                  <Loader2 size={26} className="mx-auto animate-spin text-emerald-600" />
-                  <p className="mt-2 text-xs sm:text-sm font-semibold text-stone-500">Loading pending requests...</p>
-                </div>
-              ) : savingRequests.length === 0 ? (
-                <div className="py-12 sm:py-16 text-center rounded-xl border border-emerald-100 bg-emerald-50">
-                  <CheckCircle2 size={32} className="mx-auto text-emerald-600" />
-                  <p className="mt-2 text-xs sm:text-sm font-bold text-emerald-700">No Pending Requests</p>
-                  <p className="mt-1 text-[11px] text-emerald-600">All Daily Saving requests have been processed.</p>
-                </div>
-              ) : (
-                <>
-                  {/* Desktop view */}
-                  <div className="hidden lg:block overflow-x-auto rounded-xl border border-stone-200">
-                    <table className="w-full min-w-[900px] text-left">
-                      <thead>
-                        <tr className="bg-stone-900 text-[10px] font-bold uppercase tracking-wider text-stone-300">
-                          <th className="p-3">Request Type</th>
-
-                          <th className="p-3">Member</th>
-                          <th className="p-3">Agent</th>
-                          <th className="p-3">Area</th>
-                          <th className="p-3">Collection</th>
-                          <th className="p-3">Duration</th>
-                          <th className="p-3">Start Date</th>
-                          <th className="p-3 text-center">Action</th>
-                        </tr>
-                      </thead>
-
-                      <tbody className="divide-y divide-stone-100 text-sm">
-                        {savingRequests.map((request) => {
-                          const amount = request.collectionType === "FIXED" ? Number(request.fixedAmount || 0) : 0;
-                          const processing = processingRequestId === request._id;
-
-                          return (
-                            <tr key={request._id} className="hover:bg-emerald-50/40">
-                              <td className="p-3">
-  {request.requestType === "TERMINATION" ? (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
-      <XCircle size={12} />
-      Termination Request
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
-      <Plus size={12} />
-      Account Creation
-    </span>
-  )}
-</td>
-
-                              <td className="p-3">
-                                <p className="font-bold text-stone-800">{request.member?.memberName || "—"}</p>
-                                <p className="text-[11px] text-stone-400">ID: {request.member?.memberId || "—"}</p>
-                                <p className="text-[11px] text-stone-400">{request.member?.mobile || "—"}</p>
-                              </td>
-
-                              <td className="p-3">
-                                <p className="font-semibold text-stone-700">{request.requestedBy?.name || "—"}</p>
-                                <p className="text-[11px] text-stone-400">{request.requestedBy?.mobile || "—"}</p>
-                              </td>
-
-                              <td className="p-3 font-medium text-stone-600">{request.areaGroup?.areaName || "—"}</td>
-
-                              <td className="p-3">
-                                <span className="font-bold text-stone-700">{request.collectionType || "—"}</span>
-                                {request.collectionType === "FIXED" && <p className="text-emerald-700 font-black">{formatINR(amount)}</p>}
-                              </td>
-
-                              <td className="p-3 font-semibold text-stone-600">{request.durationDays || 0} Days</td>
-
-                              <td className="p-3 font-medium text-stone-600 whitespace-nowrap">
-                                {request.startDate ? new Date(request.startDate).toLocaleDateString("en-IN") : "—"}
-                              </td>
-
-                              <td className="p-3">
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleViewSavingRequest(request)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200"
-                                  >
-                                    <Eye size={13} />
-                                    View
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    disabled={processing}
-                                    onClick={() => handleApproveSavingRequest(request)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 px-3 py-2 text-xs font-bold text-white"
-                                  >
-                                    {processing ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
-                                    Approve
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    disabled={processing}
-                                    onClick={() => handleRejectSavingRequest(request)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 disabled:opacity-50 px-3 py-2 text-xs font-bold text-rose-700 ring-1 ring-rose-200"
-                                  >
-                                    <XCircle size={13} />
-                                    Reject
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Mobile view */}
-                  <div className="lg:hidden space-y-3">
-                    {savingRequests.map((request) => {
-                      const amount = request.collectionType === "FIXED" ? Number(request.fixedAmount || 0) : 0;
-                      const processing = processingRequestId === request._id;
-
-                      return (
-                        <div key={request._id} className="rounded-xl border border-stone-200 bg-white p-3.5 sm:p-4 shadow-sm">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-bold text-stone-800 text-sm truncate">{request.member?.memberName || "—"}</p>
-                              <p className="text-[11px] text-stone-400">ID: {request.member?.memberId || "—"}</p>
-                              <p className="text-[11px] text-stone-400">{request.member?.mobile || "—"}</p>
-                            </div>
-
-                            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 ring-1 ring-amber-200 shrink-0">
-                              Pending
-                            </span>
-                          </div>
-
-                          <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-stone-50 border border-stone-200 p-2.5 sm:p-3 text-xs">
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Agent</p>
-                              <p className="mt-0.5 font-bold text-stone-700 truncate">{request.requestedBy?.name || "—"}</p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Area</p>
-                              <p className="mt-0.5 font-bold text-stone-700 truncate">{request.areaGroup?.areaName || "—"}</p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Daily Amount</p>
-                              <p className="mt-0.5 font-black text-emerald-700 truncate">
-                                {request.collectionType === "FIXED" ? formatINR(amount) : "Flexible"}
-                              </p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Duration</p>
-                              <p className="mt-0.5 font-bold text-stone-700 truncate">{request.durationDays || 0} Days</p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Start Date</p>
-                              <p className="mt-0.5 font-bold text-stone-700 truncate">
-                                {request.startDate ? new Date(request.startDate).toLocaleDateString("en-IN") : "—"}
-                              </p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[9px] uppercase font-bold text-stone-400 truncate">Collection</p>
-                              <p className="mt-0.5 font-bold text-stone-700 truncate">{request.collectionType || "—"}</p>
-                            </div>
-                          </div>
-
-                          <div className="mt-3 grid grid-cols-3 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleViewSavingRequest(request)}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200"
-                            >
-                              <Eye size={13} />
-                              View
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={processing}
-                              onClick={() => handleApproveSavingRequest(request)}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 px-3 py-2 text-xs font-bold text-white"
-                            >
-                              {processing ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
-                              Approve
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={processing}
-                              onClick={() => handleRejectSavingRequest(request)}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 disabled:opacity-50 px-3 py-2 text-xs font-bold text-rose-700 ring-1 ring-rose-200"
-                            >
-                              <XCircle size={13} />
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="border-t border-stone-100 bg-stone-50 p-3 sm:p-4 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowSavingRequests(false)}
-                className="w-full rounded-xl border border-stone-200 bg-white py-2.5 text-xs sm:text-sm font-bold text-stone-600 hover:bg-stone-100"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==========================================
-          PENDING REQUEST COMPLETE DETAILS MODAL
-      ========================================== */}
-      {showRequestDetailsModal && selectedSavingRequest && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4">
-          <div className="w-full max-w-4xl max-h-[94vh] overflow-hidden rounded-2xl bg-white shadow-2xl border border-stone-200 flex flex-col">
-            <div className="flex items-center justify-between gap-3 bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 px-4 sm:px-6 py-4 shrink-0">
-              <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300">
-                  Pending Saving Request
-                </p>
-                <h3 className="mt-0.5 text-base sm:text-xl font-black text-white truncate">
-                  {selectedSavingRequest.member?.memberName || "Saving Request"}
-                </h3>
-                <p className="mt-0.5 text-[10px] sm:text-[11px] text-indigo-200 truncate">
-                  Request ID: {selectedSavingRequest._id || "—"}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={closeSavingRequestDetails}
-                className="shrink-0 rounded-lg p-1.5 text-white hover:bg-white/10 transition"
-                aria-label="Close request details"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4">
-              <section className="rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <UserRound size={18} className="text-indigo-600" />
-                  <h4 className="text-sm font-black text-stone-800">Member Information</h4>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
-                  {[
-                    ["Member Name", selectedSavingRequest.member?.memberName],
-                    ["Member ID", selectedSavingRequest.member?.memberId],
-                    ["Mobile", selectedSavingRequest.member?.mobile],
-                    ["Alternate Mobile", selectedSavingRequest.member?.alternateMobile],
-                    ["Father / Husband", selectedSavingRequest.member?.fatherName || selectedSavingRequest.member?.fatherOrHusbandName],
-                    ["Gender", selectedSavingRequest.member?.gender],
-                    ["Date of Birth", selectedSavingRequest.member?.dob ? new Date(selectedSavingRequest.member.dob).toLocaleDateString("en-IN") : "—"],
-                    ["Email", selectedSavingRequest.member?.email],
-                  ].map(([label, value]) => (
-                    <div key={label} className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400 truncate">{label}</p>
-                      <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800 break-words">{value || "—"}</p>
-                    </div>
-                  ))}
-
-                  <div className="col-span-2 sm:col-span-3 lg:col-span-4">
-                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400">Address</p>
-                    <p className="mt-0.5 text-xs sm:text-sm font-semibold text-stone-800 break-words">
-                      {selectedSavingRequest.member?.residentialAddress || selectedSavingRequest.member?.address || "—"}
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <UserRound size={18} className="text-blue-600" />
-                  <h4 className="text-sm font-black text-stone-800">Agent / Request Information</h4>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
-                  {[
-                    ["Agent Name", selectedSavingRequest.requestedBy?.name],
-                    ["Agent Mobile", selectedSavingRequest.requestedBy?.mobile],
-                    ["Agent ID", selectedSavingRequest.requestedBy?._id],
-                    ["Area Group", selectedSavingRequest.areaGroup?.areaName],
-                    ["Request Status", selectedSavingRequest.status || "PENDING"],
-                    ["Requested At", selectedSavingRequest.createdAt ? new Date(selectedSavingRequest.createdAt).toLocaleString("en-IN") : "—"],
-                  ].map(([label, value]) => (
-                    <div key={label} className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400 truncate">{label}</p>
-                      <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800 break-words">{value || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <Wallet size={18} className="text-emerald-600" />
-                  <h4 className="text-sm font-black text-stone-800">Daily Saving Plan Details</h4>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
-                  {[
-                    ["Collection Type", selectedSavingRequest.collectionType],
-                    ["Daily Fixed Amount", selectedSavingRequest.collectionType === "FIXED" ? formatINR(selectedSavingRequest.fixedAmount) : "Flexible"],
-                    ["Duration", `${selectedSavingRequest.durationDays || 0} Days`],
-                    ["Start Date", selectedSavingRequest.startDate ? new Date(selectedSavingRequest.startDate).toLocaleDateString("en-IN") : "—"],
-                    ["End Date", selectedSavingRequest.endDate ? new Date(selectedSavingRequest.endDate).toLocaleDateString("en-IN") : "—"],
-                    ["Grace Period", `${selectedSavingRequest.graceDays ?? 0} Days`],
-                    ["Penalty Type", selectedSavingRequest.penaltyType],
-                    ["Penalty Value", selectedSavingRequest.penaltyValue ?? 0],
-                  ].map(([label, value]) => (
-                    <div key={label} className="min-w-0">
-                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400 truncate">{label}</p>
-                      <p className="mt-0.5 text-xs sm:text-sm font-black text-stone-800 break-words">{value || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <ShieldCheck size={18} className="text-amber-600" />
-                  <h4 className="text-sm font-black text-stone-800">Nominee Information</h4>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                  <div>
-                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400">Nominee Name</p>
-                    <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800">{selectedSavingRequest.nomineeName || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-stone-400">Nominee Mobile</p>
-                    <p className="mt-0.5 text-xs sm:text-sm font-bold text-stone-800">{selectedSavingRequest.nomineeMobile || "—"}</p>
-                  </div>
-                </div>
-              </section>
-
-              {(selectedSavingRequest.rejectionReason || selectedSavingRequest.notes) && (
-                <section className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5">
-                  <h4 className="text-sm font-black text-stone-800 mb-3">Additional Information</h4>
-
-                  {selectedSavingRequest.notes && (
-                    <div className="mb-3">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Notes</p>
-                      <p className="mt-1 text-xs sm:text-sm font-semibold text-stone-700 whitespace-pre-wrap">
-                        {selectedSavingRequest.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedSavingRequest.rejectionReason && (
-                    <div>
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Rejection Reason</p>
-                      <p className="mt-1 text-xs sm:text-sm font-semibold text-rose-700 whitespace-pre-wrap">
-                        {selectedSavingRequest.rejectionReason}
-                      </p>
-                    </div>
-                  )}
-                </section>
-              )}
-            </div>
-
-            <div className="border-t border-stone-100 bg-stone-50 p-3 sm:p-4 shrink-0">
-              <button
-                type="button"
-                onClick={closeSavingRequestDetails}
-                className="w-full rounded-xl border border-stone-200 bg-white py-2.5 text-xs sm:text-sm font-bold text-stone-600 hover:bg-stone-100"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>

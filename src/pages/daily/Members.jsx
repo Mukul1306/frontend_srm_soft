@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { 
   FiUsers, FiSearch, FiPlus, FiX, FiEye, FiEdit2, FiTrash2 
 } from "react-icons/fi";
@@ -10,7 +10,6 @@ function Members() {
   const [areas, setAreas] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate();
   // Search and Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -166,15 +165,6 @@ const loadAreas = async () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full lg:w-auto shrink-0">
-          {/* Pending Member Requests */}
-          <button
-            onClick={() => navigate("/daily/member-requests")}
-            className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all text-white font-bold text-xs uppercase tracking-wider px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer shrink-0"
-          >
-            <span className="text-sm">⏳</span>
-            <span>Pending Requests</span>
-          </button>
-
           {/* Add Member */}
           <button
             onClick={() => setShowModal(true)}
@@ -557,9 +547,6 @@ const loadAreas = async () => {
     {areas.map((area) => (
       <option key={area._id} value={area._id}>
         {area.areaName}
-        {area.assignedAgent?.name
-          ? ` — ${area.assignedAgent.name}`
-          : ""}
       </option>
     ))}
   </select>

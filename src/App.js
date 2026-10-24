@@ -55,21 +55,13 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 import DailySaving from "./pages/daily/DailySaving";
 
-import Agents from "./pages/daily/Agents";
-import AgentProfile from "./pages/daily/AgentProfile";
-
 import DailyMembers from "./pages/daily/Members";
-import DailyMemberRequests from "./pages/daily/DailyMemberRequests";
 import DailyMemberProfile from "./pages/daily/MemberProfile";
 
 import AdminCollections from "./pages/daily/AdminCollections";
 
 import PenaltyManagement from "./pages/daily/PenaltyManagement";
 import PenaltySettings from "./pages/daily/PenaltySettings";
-
-import AttendanceManagement from "./pages/daily/AttendanceManagement";
-
-import SalaryManagement from "./pages/daily/SalaryManagement";
 
 import DailyCreateLoan from "./pages/daily/CreateLoan";
 import LoansDashboard from "./pages/daily/LoansDashboard";
@@ -79,8 +71,6 @@ import CreateDailySaving from "./pages/daily/CreateDailySaving";
 
 import CollectPaymentModal from "./pages/daily/CollectPaymentModal";
 
-import Notifications from "./pages/daily/Notifications";
-
 import DailyReports from "./pages/daily/Reports";
 import DailyDashboard from "./pages/daily/Dashboard";
 import DailyProfitLoss from "./pages/daily/ProfitLoss";
@@ -88,28 +78,9 @@ import DailyProfitLoss from "./pages/daily/ProfitLoss";
 import EditMember from "./pages/daily/EditMember";
 
 import ComingSoon from "./pages/ComingSoon";
-import AdminTasks from "./pages/daily/AdminTasks";
 
 
-// =====================================================
-// AGENT PORTAL
-// =====================================================
 
-import AgentLayout from "./components/AgentLayout";
-
-import AgentDashboard from "./pages/daily/agent/AgentDashboard";
-import AgentMembers from "./pages/daily/agent/AgentMembers";
-import AgentAttendance from "./pages/daily/agent/AgentAttendance";
-import AgentTerms from "./pages/daily/agent/AgentTerms";
-
-import CollectPayment from "./pages/daily/agent/CollectPayment";
-import CollectionHistory from "./pages/daily/agent/CollectionHistory";
-
-import LoanManagment from "./pages/daily/agent/LoanManagment";
-import AgentLoanDetails from "./pages/daily/agent/LoanDetails";
-import Collection from "./pages/daily/agent/Collection";
-import AgentMemberRegister from "./pages/daily/agent/AgentMemberRegister";
-import AgentTasks from "./pages/daily/agent/AgentTasks";
 // =====================================================
 // DAILY MEMBER PORTAL
 // =====================================================
@@ -158,11 +129,8 @@ import SocietyMemberProfile
 // =====================================================
 
 
-
-
 const ROLE_HOME = {
   ADMIN: "/dashboard",
-  AGENT: "/agent/dashboard",
   MEMBER: "/user/dashboard",
   SOCIETY_MEMBER: "/society-member/dashboard",
 };
@@ -178,9 +146,6 @@ function getSavedSession() {
         : localStorage.getItem("token");
 
     if (!home || !token) return null;
-
-    if (role === "AGENT" &&
-        !localStorage.getItem("agent")) return null;
 
     if (role === "MEMBER" &&
         !localStorage.getItem("member")) return null;
@@ -215,7 +180,6 @@ function LoginRedirect() {
 
   return <Navigate to={session.home} replace />;
 }
-
 
 
 function App() {
@@ -371,15 +335,8 @@ function App() {
             path="/daily/members"
             element={<DailyMembers />}
           />
-<Route
-  path="/daily/member-requests"
-  element={<DailyMemberRequests />}
-/>
 
-<Route
-  path="/daily/tasks"
-  element={<AdminTasks />}
-/>
+
 
           <Route
             path="/daily/member/:id"
@@ -387,28 +344,8 @@ function App() {
           />
 
           <Route
-            path="/daily/agents"
-            element={<Agents />}
-          />
-
-          <Route
-            path="/daily/agent/:id"
-            element={<AgentProfile />}
-          />
-
-          <Route
             path="/daily/collections"
             element={<AdminCollections />}
-          />
-
-          <Route
-            path="/daily/attendance"
-            element={<AttendanceManagement />}
-          />
-
-          <Route
-            path="/daily/salary"
-            element={<SalaryManagement />}
           />
 
           <Route
@@ -481,10 +418,7 @@ function App() {
               DAILY REPORTS
           ------------------------------- */}
 
-          <Route
-            path="/daily/notifications"
-            element={<Notifications />}
-          />
+         
 
           <Route
             path="/daily/daily-reports"
@@ -494,70 +428,6 @@ function App() {
           <Route
             path="/daily/profit-loss"
             element={<DailyProfitLoss />}
-          />
-
-        </Route>
-</Route>
-
-        {/* =================================================
-            AGENT PORTAL
-        ================================================= */}
-
-       <Route element={<RequireAuth allowedRoles={["AGENT"]} />}>
-  <Route element={<AgentLayout />}>
-
-
-          <Route
-            path="/agent/dashboard"
-            element={<AgentDashboard />}
-          />
-
-          <Route
-            path="/agent/members"
-            element={<AgentMembers />}
-          />
-
-          <Route
-            path="/agent/attendance"
-            element={<AgentAttendance />}
-          />
-
-          <Route
-            path="/agent/terms"
-            element={<AgentTerms />}
-          />
-<Route
-  path="/agent/collection"
-  element={<Collection />}
-/>
-<Route
-  path="/agent/member-register"
-  element={<AgentMemberRegister />}
-/>
-
-<Route
-  path="/agent/tasks"
-  element={<AgentTasks />}
-/>
-
-          <Route
-            path="/agent/collect/:savingId"
-            element={<CollectPayment />}
-          />
-
-          <Route
-            path="/agent/history"
-            element={<CollectionHistory />}
-          />
-
-          <Route
-            path="/agent/loans"
-            element={<LoanManagment />}
-          />
-
-          <Route
-            path="/agent/loan/:id"
-            element={<AgentLoanDetails />}
           />
 
         </Route>

@@ -63,8 +63,6 @@ disbursementMode: "CASH",
 
 loanPurpose: "",
 
-agentRemarks: "",
-
     cheque1Number: "",
     cheque2Number: "",
     passportPhoto: false,
@@ -310,7 +308,6 @@ const loadMember = async (memberId) => {
         loan.disbursementMode || "CASH",
 
       loanPurpose: loan.loanPurpose || "",
-      agentRemarks: loan.agentRemarks || "",
 
       // Cheques
       cheque1Number: loan.cheque1Number || "",
@@ -733,12 +730,6 @@ if (isEdit) {
       </h3>
     </div>
 
-    <div>
-      <p className="text-xs text-slate-400">Assigned Agent</p>
-      <h3 className="font-bold">
-        {memberData.assignedAgent?.name || "Not Assigned"}
-      </h3>
-    </div>
 
   </div>
 )}

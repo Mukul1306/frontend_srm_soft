@@ -383,16 +383,6 @@ Select Member
   </span>
 </div>
 
-<div className="grid grid-cols-3">
-  <span className="text-slate-400 font-bold text-xs uppercase">
-    Agent
-  </span>
-
-  <span className="col-span-2 text-slate-700 font-semibold">
-    {selectedMember.assignedAgent?.name || "N/A"}
-  </span>
-</div>
-
                 <div className="grid grid-cols-3">
                   <span className="text-slate-400 font-bold text-xs uppercase">Location</span>
                   <span className="col-span-2 text-slate-600 font-medium">
